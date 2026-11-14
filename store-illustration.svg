@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 230" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Una bodega entre colores y montañas</title>
+  <desc id="desc">Ilustración original de una bodega con toldo de colores, motivos geométricos, canastas de productos y montañas con terrazas al fondo.</desc>
+  <defs>
+    <linearGradient id="sky" x1="180" y1="4" x2="180" y2="211" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1d6"/><stop offset="1" stop-color="#fff8ed"/></linearGradient>
+    <linearGradient id="wall" x1="87" y1="105" x2="265" y2="209" gradientUnits="userSpaceOnUse"><stop stop-color="#fffdf5"/><stop offset="1" stop-color="#f8e8c9"/></linearGradient>
+    <clipPath id="canopy"><path d="M78 77h196l20 28H58z"/></clipPath>
+  </defs>
+  <path d="M20 173V88C20 44 83 9 158 10c98 1 173 37 183 97 12 67-30 104-152 105C81 212 20 204 20 173Z" fill="url(#sky)"/>
+  <circle cx="292" cy="43" r="24" fill="#f6b83e"/>
+  <g stroke="#edac2c" stroke-width="2.2" stroke-linecap="round"><path d="M292 10V5m0 76v-5m-33-33h-5m76 0h-5m-56-23-4-4m54 54-4-4m0-46 4-4m-54 54 4-4"/></g>
+  <path d="m14 147 61-88 43 48 56-79 69 91 32-40 74 72v30H14Z" fill="#ceded1"/>
+  <path d="m103 142 71-114 69 91 32-40 74 72v30H103Z" fill="#82b4aa"/>
+  <path d="m145 76 29-48 33 44-21-8-12 10-14-11Z" fill="#fffdf1"/>
+  <path d="m24 151 50-55 43 44 21-18 48 54H24Z" fill="#e8a486"/>
+  <path d="m224 160 51-81 74 72v40H224Z" fill="#438f88"/>
+  <path d="m257 107 18-28 23 22-14-3-9 8-8-6Z" fill="#e6f0e6"/>
+  <path d="M17 154h51v-8h39v-9h30m110 7h31v-9h47m-85 23h48v-10h47m-81 24h44v-10h45" stroke="#fff6dc" stroke-width="2" opacity=".65" stroke-linejoin="round"/>
+  <g stroke="#173f35" stroke-width="1.1" stroke-linejoin="round"><path d="M301 156v-35h27v35" fill="#f6b83e"/><path d="m297 122 17-13 18 13Z" fill="#9b385e"/><path d="M310 156v-16h10v16" fill="#087f8c"/><path d="M31 164v-35h28v35" fill="#e76f51"/><path d="m27 130 18-12 18 12Z" fill="#173f35"/><path d="M40 141h10v10H40z" fill="#fff8ed"/></g>
+  <ellipse cx="181" cy="214" rx="151" ry="11" fill="#173f35" opacity=".1"/>
+  <path d="m65 98 13-14v125H65Z" fill="#bc684c"/>
+  <path d="M78 87h196v122H78z" fill="url(#wall)" stroke="#173f35" stroke-width="1.3"/>
+  <path d="M78 105h196v12H78z" fill="#173f35" opacity=".1"/>
+  <path d="M91 47h171v30H91z" fill="#173f35"/><path d="M96 51h161v22H96z" stroke="#f6b83e" stroke-width=".8"/>
+  <path d="m104 62 4-4 4 4-4 4Zm137 0 4-4 4 4-4 4Z" fill="#f6b83e"/>
+  <text x="176" y="67" fill="#fff8ed" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="3" text-anchor="middle">BODEGA</text>
+  <g clip-path="url(#canopy)"><path d="M57 77h238v29H57z" fill="#f6b83e"/><path d="M77 77h29l-8 29H57Zm57 0h28l-2 29h-32Zm55 0h27l5 29h-32Zm55 0h30l20 29h-39Z" fill="#173f35"/><path d="M106 77h28l-6 29H98Z" fill="#e76f51"/><path d="M162 77h27v29h-29Z" fill="#087f8c"/><path d="M216 77h28l11 29h-34Z" fill="#9b385e"/></g>
+  <path d="M78 77h196l20 28H58z" stroke="#173f35" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M58 105h40v5c0 9-40 9-40 0Z" fill="#173f35"/><path d="M98 105h30v5c0 9-30 9-30 0Z" fill="#e76f51"/><path d="M128 105h32v5c0 9-32 9-32 0Z" fill="#f6b83e"/><path d="M160 105h29v5c0 9-29 9-29 0Z" fill="#087f8c"/><path d="M189 105h32v5c0 9-32 9-32 0Z" fill="#173f35"/><path d="M221 105h34v5c0 9-34 9-34 0Z" fill="#9b385e"/><path d="M255 105h39v5c0 9-39 9-39 0Z" fill="#f6b83e"/>
+  <path d="M62 101h228" stroke="#fff8ed" stroke-width="1.3" opacity=".75"/>
+  <path d="M88 125h105v65H88z" fill="#173f35"/><path d="M92 129h97v57H92z" fill="#b7d7c8"/><path d="M92 155h97m-48-26v57" stroke="#173f35" stroke-width="2"/>
+  <g stroke="#173f35" stroke-width=".9" stroke-linejoin="round"><path d="M100 137h11v15h-11z" fill="#fff8ed"/><path d="M103 133h5v4h-5z" fill="#e76f51"/><path d="M117 136h13v16h-13z" fill="#f6b83e"/><path d="M120 132h7v4h-7z" fill="#173f35"/><path d="M150 140h12v12h-12z" fill="#9b385e"/><path d="M152 136h8v4h-8z" fill="#fff8ed"/><path d="M170 135h11v17h-11z" fill="#fff8ed"/><path d="M172 131h7v4h-7z" fill="#087f8c"/><path d="M100 165h13v17h-13z" fill="#e76f51"/><path d="M118 163h12v19h-12z" fill="#fff8ed"/><path d="M151 166h12v16h-12z" fill="#f6b83e"/><path d="M171 163h11v19h-11z" fill="#087f8c"/><path d="m102 169 4-2 5 2m9 1 4-3 4 3m24 1 5-3 4 3m13-2 4-2 4 2" stroke="#fff8ed"/></g>
+  <path d="M209 123h50v86h-50z" fill="#173f35"/><path d="M214 128h40v81h-40z" fill="#087f8c"/><path d="M219 134h30v43h-30z" fill="#d1e6d9"/><path d="m220 135 28 31m-28-18 19 20" stroke="#fffdf5" stroke-width="3" opacity=".65"/><path d="M234 135v41m-14-20h28" stroke="#173f35" stroke-width="1.2"/><circle cx="247" cy="187" r="2.3" fill="#f6b83e"/>
+  <path d="M77 193h121v16H77z" fill="#f6b83e" stroke="#173f35" stroke-width="1"/><path d="M79 196h116v3H79z" fill="#e76f51"/><path d="m87 203 4-3 4 3-4 3Zm23 0 4-3 4 3-4 3Zm23 0 4-3 4 3-4 3Zm23 0 4-3 4 3-4 3Zm23 0 4-3 4 3-4 3Z" fill="#173f35"/>
+  <g stroke="#173f35" stroke-width="1.2" stroke-linejoin="round"><path d="M40 185h66l-4 25H45z" fill="#e76f51"/><path d="M43 194h60m-58 8h56m-48-17 3 24m32-24-2 24" stroke="#a2493d"/><path d="M47 183c-6-13 9-22 15-11 3-14 19-13 19 0 10-10 23 1 16 12" fill="#f6b83e"/><path d="m56 171 3 3 5-5m11 0 4 3 4-4m5 8 5-2 3 4" stroke="#173f35" stroke-linecap="round"/><path d="M110 186c-3-7-2-17 2-24h23c5 9 6 16 3 24l-3 22h-22z" fill="#fff3d9"/><path d="M111 163h25m-17 5h11" stroke="#ba9b6b"/><path d="M111 186h27v12h-27z" fill="#9b385e" stroke="none"/><path d="m117 192 4-4 4 4-4 4Zm10 0 4-4 4 4-4 4Z" fill="#f6b83e" stroke="none"/><path d="M145 192h28l-2 16h-24z" fill="#087f8c"/><circle cx="152" cy="186" r="7" fill="#e76f51"/><circle cx="165" cy="186" r="7" fill="#e76f51"/><path d="m149 180 3 3 3-3m7 0 3 3 3-3" stroke="#173f35" stroke-linecap="round"/></g>
+  <g stroke="#173f35" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M294 198v-40"/><path d="M294 180c-17-2-23-17-16-25 10 3 17 14 16 25Z" fill="#087f8c"/><path d="M294 172c1-17 14-25 22-19 1 11-9 20-22 19Z" fill="#4a9a76"/><path d="M294 191c10-1 19-11 15-18-10 0-17 9-15 18Z" fill="#f6b83e"/><path d="M281 194h26l-4 16h-18z" fill="#9b385e"/><path d="m287 201 4-3 4 3 4-3 4 3" stroke="#fff8ed"/></g>
+  <path d="M28 211h304" stroke="#173f35" stroke-width="1.3" stroke-linecap="round"/><path d="M201 218h42m-89 3h19m-124-3h27" stroke="#d6b995" stroke-width="1.5" stroke-linecap="round"/><path d="m318 191 3-3 3 3-3 3Zm-281-31 3-3 3 3-3 3Z" fill="#f6b83e"/>
+</svg>

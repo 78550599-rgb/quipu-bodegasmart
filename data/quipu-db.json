@@ -1,0 +1,140 @@
+{
+  "users": [
+    {
+      "id": "user-local-1",
+      "email": "lucia@quipu.local",
+      "display_name": "Lucía (Bodega La Esquinita)",
+      "is_admin": true,
+      "trial_used": true,
+      "created_at": "2026-11-08T01:11:03.166Z"
+    }
+  ],
+  "sessions": {},
+  "businesses": [
+    {
+      "id": "biz-esquinita",
+      "owner_id": "user-local-1",
+      "name": "Bodega La Esquinita",
+      "status": "active",
+      "trial_ends_at": "2026-12-08T01:11:03.180Z",
+      "paid_ends_at": null,
+      "created_at": "2026-11-08T01:11:03.166Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "business_id": "biz-esquinita",
+      "name": "Leche Evaporada 400g",
+      "category": "Lácteos",
+      "barcode": "7750100001234",
+      "unit_cost_micros": 3200000,
+      "sale_price_cents": 420,
+      "stock": 18,
+      "minimum_stock": 6,
+      "expiry_date": "2026-12-07"
+    },
+    {
+      "id": "prod-2",
+      "business_id": "biz-esquinita",
+      "name": "Arroz Extra 1kg",
+      "category": "Abarrotes",
+      "barcode": "7750100005678",
+      "unit_cost_micros": 3400000,
+      "sale_price_cents": 450,
+      "stock": 4,
+      "minimum_stock": 5,
+      "expiry_date": ""
+    },
+    {
+      "id": "prod-3",
+      "business_id": "biz-esquinita",
+      "name": "Aceite Vegetal 900ml",
+      "category": "Abarrotes",
+      "barcode": "7750100009012",
+      "unit_cost_micros": 6800000,
+      "sale_price_cents": 850,
+      "stock": 10,
+      "minimum_stock": 3,
+      "expiry_date": "2026-11-12"
+    }
+  ],
+  "sales": [
+    {
+      "id": "sale-1",
+      "business_id": "biz-esquinita",
+      "total_cents": 840,
+      "cost_cents": 640,
+      "method": "cash",
+      "customer_id": null,
+      "occurred_at": "2026-11-08T01:11:03.166Z"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "exp-1",
+      "business_id": "biz-esquinita",
+      "concept": "Bolsas biodegradables y limpieza",
+      "category": "Insumos",
+      "amount_cents": 650,
+      "method": "cash",
+      "occurred_at": "2026-11-08T01:11:03.166Z"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "sup-1",
+      "business_id": "biz-esquinita",
+      "name": "Distribuidora Andina SAC",
+      "contact_name": "Carlos Mendoza",
+      "phone": "987654321",
+      "place": "Lima Centro",
+      "delivery_cents": 500,
+      "lead_days": 1,
+      "enabled": true
+    }
+  ],
+  "offers": [
+    {
+      "id": "off-1",
+      "business_id": "biz-esquinita",
+      "supplier_id": "sup-1",
+      "product_id": "prod-1",
+      "unit_price_cents": 300,
+      "minimum_quantity": 12,
+      "valid_until": "2026-12-07"
+    }
+  ],
+  "purchases": [],
+  "customers": [
+    {
+      "id": "cust-1",
+      "business_id": "biz-esquinita",
+      "name": "Vecina Rosa (Dpto 302)",
+      "note": "Paga los sábados",
+      "balance_cents": 1250
+    }
+  ],
+  "closures": [
+    {
+      "id": "clos-1",
+      "business_id": "biz-esquinita",
+      "local_date": "2026-11-07",
+      "counted_cash_cents": 12500,
+      "counted_yape_cents": 4800,
+      "counted_plin_cents": 1500,
+      "counted_card_cents": 0
+    }
+  ],
+  "alertReviews": [],
+  "content": [],
+  "activity": [
+    {
+      "id": "act-1",
+      "action": "business_created",
+      "actor_name": "Lucía (Bodega La Esquinita)",
+      "business_name": "Bodega La Esquinita",
+      "created_at": "2026-11-08T01:11:03.166Z"
+    }
+  ]
+}

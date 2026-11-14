@@ -1,0 +1,1359 @@
+/* ==========================================================================
+   DISEÑO DE PRESENTACIÓN QUIPU (Encaje exacto 100dvh sin scroll en celular)
+   ========================================================================== */
+
+body.quipu-onboarding {
+  background: #fbf7e4 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+/* Ocultamos elementos flotantes o headers duplicados durante la presentación a pantalla completa */
+body.quipu-onboarding .quipu-onboarding-header,
+body.quipu-onboarding .easy-launch,
+body.quipu-onboarding .quipu-assistant-fab,
+body.quipu-onboarding #quipu-assistant {
+  display: none !important;
+}
+
+body.quipu-onboarding #app,
+body.quipu-onboarding .quipu-onboarding-page {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  position: relative;
+  overflow: hidden !important;
+}
+
+/* Tarjeta/Pantalla Principal de Presentación encajada al 100% del cuadro de pantalla */
+.ref-onboarding-card {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: #fbf7e4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: max(14px, env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Wallpaper real sutil en el fondo ambiental + nitidez total en el cuadro central */
+.ref-bg-wallpaper {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.12;
+  filter: saturate(1.15);
+  z-index: -2;
+  animation: refKenBurns 12s ease-in-out infinite alternate;
+}
+
+/* Ondas orgánicas verde menta en las esquinas (exactamente como la referencia) */
+.ref-corner-wave {
+  position: absolute;
+  background: #cbeada;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.ref-corner-wave.top-left {
+  top: -80px;
+  left: -80px;
+  width: 280px;
+  height: 220px;
+  border-radius: 0 0 85% 0;
+}
+
+.ref-corner-wave.bottom-right {
+  bottom: -90px;
+  right: -80px;
+  width: 310px;
+  height: 240px;
+  border-radius: 85% 0 0 0;
+}
+
+/* Contenedor central que distribuye proporcionalmente los bloques dentro del alto disponible */
+.ref-slide-inner {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  max-height: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.ref-swipe-stage {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  will-change: transform, opacity;
+  cursor: grab;
+}
+
+.ref-swipe-stage:active {
+  cursor: grabbing;
+}
+
+.ref-swipe-stage.slide-from-right {
+  animation: refSwipeInRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ref-swipe-stage.slide-from-left {
+  animation: refSwipeInLeft 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes refSwipeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(44px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes refSwipeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-44px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes refKenBurns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+/* 1. Logo superior centrado: Icono + línea divisoria "|" + Quipu CRECE CON TU NEGOCIO */
+.ref-brand-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.ref-brand-icon {
+  width: clamp(48px, 6.8dvh, 62px);
+  height: clamp(48px, 6.8dvh, 62px);
+  border-radius: 16px;
+  background: #008978;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 4px 4px 0 #f5c230;
+  flex-shrink: 0;
+}
+
+.ref-brand-icon svg {
+  width: 62%;
+  height: 62%;
+}
+
+.ref-brand-divider {
+  width: 2px;
+  height: clamp(42px, 5.8dvh, 54px);
+  background: #1b4d46;
+  opacity: 0.75;
+  border-radius: 2px;
+}
+
+.ref-brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.ref-brand-text strong {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.85rem, 4.2dvh, 2.4rem);
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #083b35;
+}
+
+.ref-brand-text small {
+  margin-top: 4px;
+  font-size: clamp(0.58rem, 1.1dvh, 0.68rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #365c56;
+}
+
+/* 2. Escena central con rayos de sol + Arco celeste + Wallpaper Real */
+.ref-hero-visual {
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  margin: 0 0 clamp(10px, 1.8dvh, 18px);
+  padding-top: 8px;
+  flex-shrink: 1;
+}
+
+.ref-sun-rays {
+  position: absolute;
+  top: -6px;
+  left: 6px;
+  width: clamp(44px, 6dvh, 56px);
+  height: clamp(44px, 6dvh, 56px);
+  z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+  animation: refPulseRays 2.8s ease-in-out infinite;
+}
+
+@keyframes refPulseRays {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.08) rotate(-4deg); }
+}
+
+.ref-arch-backdrop {
+  position: relative;
+  width: 100%;
+  height: clamp(150px, 26dvh, 235px);
+  border-radius: 130px 130px 24px 24px;
+  background: #cde9e8;
+  padding: 8px;
+  box-sizing: border-box;
+  box-shadow: 0 12px 28px -10px rgba(8, 59, 53, 0.18);
+  overflow: hidden;
+}
+
+.ref-wallpaper-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 122px 122px 18px 18px;
+  display: block;
+  animation: refKenBurns 9s ease-out forwards;
+}
+
+.ref-wallpaper-shine {
+  position: absolute;
+  inset: 8px;
+  border-radius: 122px 122px 18px 18px;
+  background: linear-gradient(to top, rgba(8, 42, 37, 0.42) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* 3. Pastilla verde menta: "📈 Tu negocio, bajo control" */
+.ref-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #cdecdb;
+  border: 1px solid #b3dec7;
+  color: #0c594c;
+  padding: clamp(6px, 1dvh, 9px) 18px;
+  border-radius: 999px;
+  font-size: clamp(0.82rem, 1.7dvh, 0.94rem);
+  font-weight: 750;
+  margin-bottom: clamp(8px, 1.5dvh, 14px);
+  box-shadow: 0 3px 10px rgba(0, 109, 91, 0.08);
+  flex-shrink: 0;
+}
+
+.ref-pill-badge svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.3;
+  color: #007562;
+}
+
+/* 4. Título grande centrado: "Organiza tu bodega fácilmente." */
+.ref-title {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.65rem, 3.8dvh, 2.45rem);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: #083b35;
+  margin: 0 0 clamp(6px, 1.2dvh, 12px);
+}
+
+/* 5. Subtítulo centrado */
+.ref-subtitle {
+  font-size: clamp(0.92rem, 1.85dvh, 1.08rem);
+  line-height: 1.42;
+  color: #3d5d57;
+  max-width: 350px;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 6. Indicador de puntos + "01 / 06" */
+.ref-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: clamp(8px, 1.5dvh, 16px) 0;
+  flex-shrink: 0;
+}
+
+.ref-prev-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #a8d4c1;
+  background: #ffffff;
+  color: #0b5b4e;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.ref-prev-arrow svg {
+  width: 15px;
+  height: 15px;
+  transform: rotate(180deg);
+}
+
+.ref-prev-arrow:hover:not(:disabled) {
+  background: #cdecdb;
+}
+
+.ref-prev-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ref-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ref-dots button {
+  background: none;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.ref-dots button span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #bce2d1;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ref-dots button[aria-current="step"] span {
+  background: #007a67;
+  transform: scale(1.2);
+}
+
+.ref-counter {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #3d5d57;
+  letter-spacing: 0.03em;
+}
+
+/* 7. Botón principal ancho verde redondeado: "Continuar →" */
+.ref-continue-btn {
+  width: 100%;
+  max-width: 390px;
+  min-height: clamp(46px, 6.8dvh, 56px);
+  border-radius: 999px;
+  border: 0;
+  background: #006d5b;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: clamp(1.02rem, 2.1dvh, 1.16rem);
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #06483d, 0 10px 20px rgba(0, 109, 91, 0.22);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+  margin-bottom: clamp(6px, 1.2dvh, 12px);
+  flex-shrink: 0;
+}
+
+.ref-continue-btn:hover {
+  background: #007f6a;
+  transform: translateY(-2px);
+}
+
+.ref-continue-btn:active {
+  transform: translateY(1px);
+}
+
+.ref-continue-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 8. Enlace inferior subrayado: "Saltar introducción" */
+.ref-skip-link {
+  background: none;
+  border: 0;
+  color: #0b6354;
+  font-family: inherit;
+  font-size: clamp(0.9rem, 1.8dvh, 1rem);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  padding: 4px 12px;
+  flex-shrink: 0;
+}
+
+.ref-skip-link:hover {
+  color: #063d34;
+}
+
+/* ==========================================================================
+   DISEÑO DE PÁGINA #INICIO (Basado 1:1 en la imagen de referencia del usuario)
+   ========================================================================== */
+
+main.quipu-ref-home {
+  background: #fbf7e8;
+  padding: 20px 0 48px;
+}
+
+.quipu-ref-home .bs-wrap {
+  max-width: 1120px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 1. HERO SUPERIOR: Texto a la izquierda + Ilustración Bodega/Farmacia/Celular a la derecha */
+.quipu-ref-hero {
+  display: grid;
+  grid-template-columns: 1fr 1.18fr;
+  align-items: center;
+  gap: 24px;
+  background: linear-gradient(135deg, #fdfaf0 0%, #f7f1de 100%);
+  border: 1px solid #eadfc3;
+  border-radius: 28px;
+  padding: 28px 28px 28px 34px;
+  box-shadow: 0 12px 30px -14px rgba(10, 60, 54, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.quipu-ref-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.quipu-ref-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.quipu-ref-badge-pink {
+  display: inline-block;
+  background: #ffd6df;
+  color: #c83e5b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 999px;
+}
+
+.quipu-ref-pink-rays {
+  width: 24px;
+  height: 24px;
+  color: #f08ca2;
+}
+
+.quipu-ref-hero-copy h1 {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: clamp(2.3rem, 4.2vw, 3.25rem);
+  font-weight: 850;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  color: #083b35;
+  margin: 0 0 14px;
+}
+
+.quipu-ref-hero-copy p {
+  font-size: 1.12rem;
+  line-height: 1.45;
+  color: #26534b;
+  font-weight: 500;
+  max-width: 420px;
+  margin: 0 0 24px;
+}
+
+.quipu-ref-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.quipu-ref-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #0d6e5b;
+  color: #ffffff !important;
+  text-decoration: none;
+  font-weight: 750;
+  font-size: 1rem;
+  padding: 13px 24px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(13, 110, 91, 0.25);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+
+.quipu-ref-btn-primary:hover {
+  background: #0a5949;
+  transform: translateY(-2px);
+}
+
+.quipu-ref-btn-primary svg,
+.quipu-ref-btn-secondary svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.quipu-ref-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: #ffffff;
+  color: #0b4f43 !important;
+  border: 1.5px solid #90c9b5;
+  text-decoration: none;
+  font-weight: 750;
+  font-size: 1rem;
+  padding: 12px 22px;
+  border-radius: 999px;
+  box-shadow: 0 4px 10px rgba(10, 60, 54, 0.06);
+  transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.quipu-ref-btn-secondary:hover {
+  background: #f0faf5;
+  border-color: #0d6e5b;
+  transform: translateY(-2px);
+}
+
+.quipu-ref-hero-art {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.quipu-ref-hero-art img {
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  border-radius: 22px;
+  display: block;
+  box-shadow: 0 10px 26px rgba(8, 59, 53, 0.1);
+}
+
+/* 2. BARRA SELECTORA: "¿Qué negocio tienes?" */
+.quipu-ref-bizbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: linear-gradient(90deg, #e7f6ee 0%, #d4efe1 100%);
+  border: 1.5px solid #bde3cf;
+  border-radius: 24px;
+  padding: 18px 26px;
+  box-shadow: 0 6px 18px rgba(10, 60, 54, 0.05);
+}
+
+.quipu-ref-bizbar-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quipu-ref-bizbar-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #c5e9d6;
+  color: #0b6957;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.quipu-ref-bizbar-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.quipu-ref-bizbar-info h2 {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 850;
+  color: #083b35;
+  margin: 0 0 3px;
+  letter-spacing: -0.02em;
+}
+
+.quipu-ref-bizbar-info p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #2c5b52;
+  font-weight: 500;
+}
+
+.quipu-ref-bizbar-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.quipu-ref-biz-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: #ffffff;
+  color: #0b4a3e;
+  border: 1.5px solid #c3e2d2;
+  border-radius: 999px;
+  padding: 11px 22px;
+  font-family: inherit;
+  font-size: 0.96rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(8, 59, 53, 0.05);
+  transition: all 0.18s ease;
+}
+
+.quipu-ref-biz-pill svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+
+.quipu-ref-biz-pill:hover {
+  border-color: #0d6e5b;
+  transform: translateY(-1px);
+}
+
+.quipu-ref-biz-pill.active {
+  background: #0d6e5b;
+  color: #ffffff;
+  border-color: #0d6e5b;
+  box-shadow: 0 6px 14px rgba(13, 110, 91, 0.25);
+}
+
+.quipu-ref-biz-check {
+  display: none;
+  font-weight: 900;
+  margin-left: 2px;
+}
+
+.quipu-ref-biz-pill.active .quipu-ref-biz-check {
+  display: inline;
+}
+
+/* 3. SECCIÓN CUERDA DE QUIPU ANIMADA + 6 CUADROS CON GIRO 3D (Basado en media_1794169626080_36f21d9b.jpg) */
+.quipu-rope-showcase {
+  position: relative;
+  background: linear-gradient(180deg, #fcf7e8 0%, #f6edd3 100%);
+  border: 1.5px solid #e7dab9;
+  border-radius: 30px;
+  padding: 28px 30px 36px;
+  box-shadow: 0 14px 32px -14px rgba(10, 60, 54, 0.12);
+  overflow: hidden;
+}
+
+.quipu-rope-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.quipu-mode-pill-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.quipu-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: #ffd3d9;
+  color: #8f2433;
+  font-size: 0.92rem;
+  font-weight: 800;
+  padding: 7px 18px 7px 12px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(224, 79, 95, 0.15);
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.quipu-rope-showcase[data-biz-mode="bodega"] .quipu-mode-pill {
+  background: #cfeede;
+  color: #095243;
+}
+
+.quipu-rope-showcase[data-biz-mode="minimarket"] .quipu-mode-pill {
+  background: #fde6b8;
+  color: #7c4c0b;
+}
+
+.quipu-mode-pill-icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.quipu-mode-pill-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.quipu-mode-rays {
+  width: 24px;
+  height: 24px;
+  color: #e6643c;
+}
+
+.quipu-rope-header h2 {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.85rem, 3.2vw, 2.55rem);
+  font-weight: 850;
+  color: #083b35;
+  margin: 0 0 4px;
+  letter-spacing: -0.03em;
+}
+
+.quipu-rope-header p {
+  font-size: 1.08rem;
+  color: #264e46;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ENSAMBLE DE CUERDA PRINCIPAL + CUERDAS VERTICALES 100% CONECTADAS + RESPONSIVE */
+.quipu-rope-assembly {
+  position: relative;
+  margin-top: 14px;
+}
+
+.quipu-rope-bar-wrap {
+  position: relative;
+  margin: 0 -30px;
+  padding: 0 30px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  z-index: 6;
+}
+
+.quipu-main-braid {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      -55deg,
+      #0c7460 0px,
+      #0c7460 12px,
+      #108f77 12px,
+      #108f77 18px,
+      #e29b27 18px,
+      #e29b27 30px,
+      #f6c34d 30px,
+      #f6c34d 36px,
+      #cf4232 36px,
+      #cf4232 48px
+    );
+  background-size: 68px 100%;
+  border: 2.5px solid #4e2f12;
+  box-shadow:
+    inset 0 3px 4px rgba(255, 255, 255, 0.42),
+    inset 0 -3px 4px rgba(42, 22, 5, 0.45),
+    0 6px 12px rgba(59, 36, 12, 0.24);
+  animation: quipuBraidFlow 14s linear infinite;
+}
+
+@keyframes quipuBraidFlow {
+  from { background-position: 0 0; }
+  to { background-position: 136px 0; }
+}
+
+/* Animación de tirón elástico de la cuerda cuando el usuario cambia entre Botica y Bodega */
+.quipu-rope-showcase.is-pulling .quipu-main-braid {
+  animation: quipuRopePull 0.72s cubic-bezier(0.25, 1, 0.4, 1);
+}
+
+@keyframes quipuRopePull {
+  0%   { transform: translateY(0) scaleY(1); }
+  22%  { transform: translateY(9px) scaleY(0.92) scaleX(1.012); }
+  48%  { transform: translateY(-6px) scaleY(1.06); }
+  72%  { transform: translateY(3px) scaleY(0.98); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+
+/* Cabos laterales de la cuerda */
+.quipu-rope-tail {
+  position: absolute;
+  top: -16px;
+  width: 22px;
+  height: 70px;
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(
+      35deg,
+      #e29b27 0px 9px,
+      #cf4232 9px 18px,
+      #0c7460 18px 27px
+    );
+  border: 2.5px solid #4e2f12;
+  box-shadow: 0 6px 12px rgba(42, 22, 5, 0.25);
+  z-index: 7;
+}
+
+.quipu-rope-tail.left {
+  left: 6px;
+  transform: rotate(-16deg);
+}
+
+.quipu-rope-tail.right {
+  right: 6px;
+  transform: rotate(16deg);
+}
+
+/* Nudos secundarios intermedios en la cuerda principal */
+.quipu-knot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
+}
+
+.quipu-knot.sub {
+  width: 24px;
+  height: 26px;
+  border-radius: 8px;
+  border: 2.5px solid #4e2f12;
+  box-shadow: 0 4px 8px rgba(42, 22, 5, 0.22);
+}
+
+.quipu-knot.sub.k-mid-1 {
+  left: 33.33%;
+  background: radial-gradient(circle at 35% 30%, #ffd269, #d4881b 75%);
+}
+
+.quipu-knot.sub.k-mid-2 {
+  left: 66.66%;
+  background: radial-gradient(circle at 35% 30%, #ff7863, #d13f2e 75%);
+}
+
+.quipu-rope-showcase.is-pulling .quipu-knot,
+.quipu-rope-showcase.is-pulling .q-main-knot {
+  animation: quipuKnotBounce 0.72s cubic-bezier(0.25, 1, 0.4, 1);
+}
+
+@keyframes quipuKnotBounce {
+  0%   { transform: translateX(-50%) scale(1); }
+  25%  { transform: translateX(-50%) translateY(9px) scale(0.94, 1.08); }
+  52%  { transform: translateX(-50%) translateY(-6px) scale(1.06, 0.95); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* CUADRÍCULA 3x2 DE CUADROS COLGANTES 100% CONECTADOS Y RESPONSIVE */
+.quipu-hanging-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 22px;
+  row-gap: 32px;
+  padding-top: 28px;
+  position: relative;
+  z-index: 5;
+}
+
+.quipu-hanging-slot {
+  position: relative;
+  perspective: 1200px;
+  min-width: 0;
+}
+
+/* Puente de cuerda vertical que conecta cada tarjeta con la cuerda principal o con la tarjeta superior */
+.quipu-cord-bridge {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38px;
+  height: 44px;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* Cuerda vertical trenzada continua sin huecos */
+.q-vert-rope {
+  position: absolute;
+  top: 0;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 11px;
+  background: repeating-linear-gradient(
+    180deg,
+    #eba832 0px 5px,
+    #b87317 5px 10px,
+    #0c7460 10px 15px
+  );
+  border-left: 2px solid #4e2f12;
+  border-right: 2px solid #4e2f12;
+  box-shadow: 0 2px 6px rgba(42, 22, 5, 0.22);
+}
+
+/* Nudo grande sobre la cuerda principal horizontal (solo en las tarjetas de la primera fila) */
+.q-main-knot {
+  display: none;
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 30px;
+  border-radius: 10px;
+  border: 2.5px solid #4e2f12;
+  box-shadow:
+    inset 0 3px 4px rgba(255, 255, 255, 0.45),
+    0 5px 10px rgba(42, 22, 5, 0.28);
+  text-decoration: none;
+  z-index: 9;
+}
+
+.q-main-knot.k-color-0 {
+  background: radial-gradient(circle at 35% 30%, #ff6b57, #c93728 70%, #8f2015);
+}
+.q-main-knot.k-color-1 {
+  background: radial-gradient(circle at 35% 30%, #24a88d, #0b6f5b 70%, #06483b);
+}
+.q-main-knot.k-color-2 {
+  background: radial-gradient(circle at 35% 30%, #ffd269, #d4881b 70%, #8f5608);
+}
+
+/* En escritorio (3 columnas): las primeras 3 tarjetas muestran el nudo en la cuerda principal */
+@media (min-width: 901px) {
+  .quipu-hanging-slot:nth-child(-n+3) .q-main-knot {
+    display: block;
+  }
+  .quipu-hanging-slot:nth-child(n+4) .q-bottom-clasp {
+    display: none;
+  }
+}
+
+/* En tablet (2 columnas): las primeras 2 tarjetas muestran el nudo en la cuerda principal */
+@media (min-width: 581px) and (max-width: 900px) {
+  .quipu-hanging-slot:nth-child(-n+2) .q-main-knot {
+    display: block;
+  }
+  .quipu-hanging-slot:nth-child(n+5) .q-bottom-clasp {
+    display: none;
+  }
+  .quipu-knot.sub.k-mid-1 { left: 50%; }
+  .quipu-knot.sub.k-mid-2 { display: none; }
+}
+
+/* En celular (1 columna): la primera tarjeta muestra el nudo en la cuerda principal y todas cuelgan en cadena */
+@media (max-width: 580px) {
+  .quipu-hanging-slot:nth-child(1) .q-main-knot {
+    display: block;
+  }
+  .quipu-hanging-slot:last-child .q-bottom-clasp {
+    display: none;
+  }
+  .quipu-knot.sub.k-mid-1 { left: 25%; }
+  .quipu-knot.sub.k-mid-2 { left: 75%; }
+}
+
+/* Broche/nudo superior anclado al borde superior del cuadro */
+.q-top-clasp {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 13px;
+  border-radius: 7px;
+  background: radial-gradient(circle at 40% 35%, #ffd269, #b87317 75%);
+  border: 2px solid #4e2f12;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.24);
+  z-index: 9;
+}
+
+/* Broche/nudo inferior anclado al borde inferior del cuadro superior para conectar con la fila de abajo */
+.q-bottom-clasp {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 12px;
+  border-radius: 6px;
+  background: radial-gradient(circle at 40% 35%, #ffd269, #b87317 75%);
+  border: 2px solid #4e2f12;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.22);
+  z-index: 9;
+  pointer-events: none;
+}
+
+/* Contenedor de tarjeta con balanceo de péndulo al girar */
+.quipu-flip-card {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  transform-origin: 50% -28px;
+}
+
+.quipu-flip-card.is-swinging {
+  animation: quipuCardPendulum 0.86s cubic-bezier(0.22, 1, 0.36, 1);
+  animation-delay: calc(var(--slot-idx, 0) * 55ms);
+}
+
+@keyframes quipuCardPendulum {
+  0%   { transform: translateY(0) rotateZ(0deg); }
+  25%  { transform: translateY(7px) rotateZ(-2.2deg); }
+  55%  { transform: translateY(-4px) rotateZ(1.6deg); }
+  80%  { transform: translateY(2px) rotateZ(-0.7deg); }
+  100% { transform: translateY(0) rotateZ(0deg); }
+}
+
+/* Núcleo 3D usando CSS Grid Stacking para ser 100% responsive sin desbordar texto */
+.quipu-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  transform-style: preserve-3d;
+  transform: rotateY(var(--flip-deg, 0deg));
+  transition: transform 0.72s cubic-bezier(0.34, 1.42, 0.64, 1);
+  transition-delay: calc(var(--slot-idx, 0) * 55ms);
+}
+
+.quipu-card-face {
+  grid-area: 1 / 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 156px;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: grid;
+  grid-template-columns: clamp(72px, 30%, 104px) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(145deg, #fffdf7 0%, #f9efda 100%);
+  border: 2px solid #e4d1ab;
+  border-radius: 22px;
+  padding: 16px 16px 18px;
+  box-shadow:
+    0 12px 24px -10px rgba(71, 47, 17, 0.18),
+    inset 0 0 0 4px rgba(235, 214, 173, 0.35);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quipu-card-face.face-back {
+  transform: rotateY(180deg);
+}
+
+.quipu-flip-card:hover .quipu-card-face {
+  border-color: #0d6e5b;
+  box-shadow:
+    0 16px 30px -10px rgba(13, 110, 91, 0.24),
+    inset 0 0 0 4px rgba(13, 110, 91, 0.1);
+}
+
+.quipu-rope-card-art {
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  max-height: 112px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.quipu-rope-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  mix-blend-mode: multiply;
+  display: block;
+}
+
+.quipu-rope-card-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.quipu-rope-card-body h3 {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: clamp(1rem, 1.3vw, 1.14rem);
+  font-weight: 850;
+  line-height: 1.2;
+  color: #083b35;
+  margin: 0 0 5px;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+}
+
+.quipu-rope-card-body p {
+  font-size: clamp(0.84rem, 1.05vw, 0.92rem);
+  line-height: 1.35;
+  color: #35544d;
+  font-weight: 550;
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+/* 4. BANNER INFERIOR: "🚀 Empieza en 3 pasos simples" */
+.quipu-ref-steps-banner {
+  position: relative;
+  background: linear-gradient(135deg, #e7f7ef 0%, #d2eedf 100%);
+  border: 1.5px solid #b7e0cb;
+  border-radius: 26px;
+  padding: 24px 28px;
+  box-shadow: 0 10px 24px -12px rgba(8, 59, 53, 0.1);
+  overflow: hidden;
+}
+
+.quipu-ref-steps-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.quipu-ref-steps-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quipu-ref-steps-title svg {
+  width: 32px;
+  height: 32px;
+  color: #0b7a64;
+}
+
+.quipu-ref-steps-title h2 {
+  font-family: Manrope, system-ui, -apple-system, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 850;
+  color: #083b35;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.quipu-ref-steps-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quipu-ref-step-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #faf9f2;
+  border: 1.5px solid #d4e8dc;
+  border-radius: 999px;
+  padding: 12px 18px;
+  box-shadow: 0 4px 12px rgba(8, 59, 53, 0.05);
+}
+
+.quipu-ref-step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0d6e5b;
+  color: #ffffff;
+  font-weight: 850;
+  font-size: 1.05rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.quipu-ref-step-text strong {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 820;
+  color: #083b35;
+  line-height: 1.2;
+}
+
+.quipu-ref-step-text span {
+  display: block;
+  font-size: 0.82rem;
+  color: #396058;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.quipu-ref-step-connector {
+  color: #135e4f;
+  font-weight: 800;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.quipu-ref-register-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #0d6e5b;
+  color: #ffffff !important;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.08rem;
+  padding: 16px 30px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(13, 110, 91, 0.28);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+
+.quipu-ref-register-cta:hover {
+  background: #095546;
+  transform: translateY(-2px);
+}
+
+.quipu-ref-register-cta svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive para celulares y tablets */
+@media (max-width: 980px) {
+  .quipu-ref-hero {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+  .quipu-ref-bizbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .quipu-ref-steps-row {
+    flex-wrap: wrap;
+  }
+  .quipu-ref-step-connector {
+    display: none;
+  }
+  .quipu-ref-step-pill {
+    min-width: 240px;
+  }
+  .quipu-ref-register-cta {
+    width: 100%;
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 900px) {
+  .quipu-rope-showcase {
+    padding: 22px 20px 30px;
+  }
+  .quipu-rope-bar-wrap {
+    margin: 0 -20px;
+    padding: 0 20px;
+  }
+  .quipu-hanging-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 580px) {
+  .quipu-rope-showcase {
+    padding: 18px 16px 26px;
+  }
+  .quipu-rope-bar-wrap {
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  .quipu-hanging-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .quipu-ref-bizbar-pills {
+    width: 100%;
+  }
+  .quipu-ref-biz-pill {
+    flex: 1;
+    justify-content: center;
+  }
+}

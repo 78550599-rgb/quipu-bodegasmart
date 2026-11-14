@@ -1,0 +1,396 @@
+/* ==========================================================================
+   TRANSICIÓN DE ENTRADA ANIMADA — SÍMBOLO QUIPU (2,4 s · CERO TEXTO)
+   ========================================================================== */
+
+.qp-splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  pointer-events: all;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  will-change: opacity;
+  /* Etapa 6 (2.0 s a 2.4 s): el logo y el fondo blanco se desvanecen juntos */
+  animation: qpSplashFadeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) 2.0s forwards;
+}
+
+.qp-splash-stage {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: grid;
+  place-items: center;
+}
+
+@media (max-width: 680px) {
+  .qp-splash-stage {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+.qp-splash-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   ETAPA 1 (0 a 0,5 s) + salida en (0,4 a 0,9 s):
+   Dos trazos curvos (turquesa y dorado) convergen hacia el centro
+   con pequeños destellos discretos.
+   -------------------------------------------------------------------------- */
+.qp-orbit-group {
+  transform-origin: 80px 80px;
+  animation: qpOrbitGroupExit 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.42s forwards;
+}
+
+.qp-arc-teal {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  transform-origin: 80px 80px;
+  animation:
+    qpArcDraw 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards,
+    qpArcConvergeTeal 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
+}
+
+.qp-arc-gold {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  transform-origin: 80px 80px;
+  animation:
+    qpArcDraw 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.04s forwards,
+    qpArcConvergeGold 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.04s forwards;
+}
+
+.qp-spark {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.qp-spark.s1 {
+  animation: qpSparkTwinkle 0.48s ease-out 0.08s forwards;
+}
+.qp-spark.s2 {
+  animation: qpSparkTwinkle 0.48s ease-out 0.16s forwards;
+}
+.qp-spark.s3 {
+  animation: qpSparkTwinkle 0.48s ease-out 0.22s forwards;
+}
+
+@keyframes qpArcDraw {
+  0% {
+    stroke-dashoffset: 140;
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes qpArcConvergeTeal {
+  0% {
+    transform: scale(1.22) rotate(-18deg);
+  }
+  100% {
+    transform: scale(0.86) rotate(0deg);
+  }
+}
+
+@keyframes qpArcConvergeGold {
+  0% {
+    transform: scale(1.22) rotate(18deg);
+  }
+  100% {
+    transform: scale(0.86) rotate(0deg);
+  }
+}
+
+@keyframes qpSparkTwinkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  45% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes qpOrbitGroupExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.76);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ETAPA 2 (0,4 a 0,9 s):
+   Cuadrado verde turquesa (escala 0,85 -> 1) + base amarilla desplazándose
+   unos píxeles hacia abajo y a la derecha hasta su posición final.
+   -------------------------------------------------------------------------- */
+.qp-gold-offset {
+  opacity: 0;
+  transform-origin: 80px 80px;
+  transform: translate(-8px, -8px) scale(0.85);
+  animation: qpGoldSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+}
+
+.qp-teal-box {
+  opacity: 0;
+  transform-origin: 76px 76px;
+  transform: scale(0.85);
+  animation: qpTealScaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+}
+
+@keyframes qpTealScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes qpGoldSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate(-8px, -8px) scale(0.85);
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ETAPA 3 (0,8 a 1,4 s):
+   Barra blanca superior y luego las 3 cuerdas verticales de arriba hacia abajo
+   con pequeño desfase (cuerda central más larga).
+   -------------------------------------------------------------------------- */
+.qp-bar-top {
+  stroke-dasharray: 64;
+  stroke-dashoffset: 64;
+  animation: qpStrokeDraw64 0.28s cubic-bezier(0.25, 1, 0.5, 1) 0.8s forwards;
+}
+
+.qp-cord-left {
+  stroke-dasharray: 46;
+  stroke-dashoffset: 46;
+  animation: qpStrokeDraw46 0.34s cubic-bezier(0.25, 1, 0.5, 1) 0.96s forwards;
+}
+
+.qp-cord-center {
+  stroke-dasharray: 56;
+  stroke-dashoffset: 56;
+  animation: qpStrokeDraw56 0.38s cubic-bezier(0.25, 1, 0.5, 1) 1.04s forwards;
+}
+
+.qp-cord-right {
+  stroke-dasharray: 42;
+  stroke-dashoffset: 42;
+  animation: qpStrokeDraw42 0.34s cubic-bezier(0.25, 1, 0.5, 1) 1.12s forwards;
+}
+
+@keyframes qpStrokeDraw64 {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes qpStrokeDraw46 {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes qpStrokeDraw56 {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes qpStrokeDraw42 {
+  to { stroke-dashoffset: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   ETAPA 4 (1,2 a 1,7 s):
+   Nudos blancos aparecen con un rebote muy sutil; las cuerdas quedan estables
+   reproduciendo fielmente el símbolo original.
+   -------------------------------------------------------------------------- */
+.qp-knot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+}
+
+.qp-knot.k1 {
+  animation: qpKnotPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 1.22s forwards;
+}
+.qp-knot.k2 {
+  animation: qpKnotPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 1.30s forwards;
+}
+.qp-knot.k3 {
+  animation: qpKnotPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 1.38s forwards;
+}
+
+@keyframes qpKnotPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.16);
+  }
+  85% {
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ETAPA 5 (1,6 a 2,0 s):
+   Destello dorado recorre brevemente el borde amarillo + sombra tenue debajo
+   + halo suave que se expande y desaparece.
+   -------------------------------------------------------------------------- */
+.qp-gold-shimmer {
+  opacity: 0;
+  stroke-dasharray: 110 340;
+  stroke-dashoffset: 220;
+  animation: qpGoldShimmerRun 0.44s ease-in-out 1.6s forwards;
+}
+
+.qp-soft-halo {
+  opacity: 0;
+  transform-origin: 80px 80px;
+  transform: scale(0.92);
+  animation: qpHaloPulse 0.45s cubic-bezier(0.16, 1, 0.3, 1) 1.6s forwards;
+}
+
+.qp-floor-shadow {
+  opacity: 0;
+  transform-origin: 80px 144px;
+  transform: scaleX(0.75);
+  animation: qpShadowReveal 0.4s ease-out 1.58s forwards;
+}
+
+@keyframes qpGoldShimmerRun {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 210;
+  }
+  25% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: -45;
+  }
+}
+
+@keyframes qpHaloPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  35% {
+    opacity: 0.28;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.24);
+  }
+}
+
+@keyframes qpShadowReveal {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.75);
+  }
+  100% {
+    opacity: 0.16;
+    transform: scaleX(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ETAPA 6 (2,0 a 2,4 s):
+   Desvanecimiento conjunto del logo y el fondo blanco.
+   -------------------------------------------------------------------------- */
+@keyframes qpSplashFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ACCESIBILIDAD: prefers-reduced-motion
+   Sustituye la secuencia por un desvanecimiento breve mostrando el símbolo
+   intacto sin movimiento brusco.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .qp-splash-overlay {
+    animation: qpSplashFadeOut 0.35s ease-out 0.35s forwards !important;
+  }
+  .qp-orbit-group,
+  .qp-soft-halo,
+  .qp-gold-shimmer {
+    display: none !important;
+  }
+  .qp-gold-offset,
+  .qp-teal-box,
+  .qp-knot {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .qp-bar-top,
+  .qp-cord-left,
+  .qp-cord-center,
+  .qp-cord-right {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+}
+
+/* CODEX MOTION V3 START */
+.qp-splash-overlay{pointer-events:none}
+.qp-arc-teal{animation:qpArcDraw .48s ease-out forwards,qpV3OrbitTeal .65s cubic-bezier(.22,.7,.32,1) forwards}
+.qp-arc-gold{animation:qpArcDraw .48s ease-out .04s forwards,qpV3OrbitGold .65s cubic-bezier(.22,.7,.32,1) .04s forwards}
+.qp-teal-box{animation:qpV3Entrance .5s cubic-bezier(.22,.7,.32,1) .4s forwards}
+.qp-cord-left{animation:qpStrokeDraw46 .34s ease .96s forwards,qpV3Cord .42s ease .96s both}
+.qp-cord-center{animation:qpStrokeDraw56 .38s ease 1.04s forwards,qpV3Cord .42s ease 1.04s both}
+.qp-cord-right{animation:qpStrokeDraw42 .34s ease 1.12s forwards,qpV3Cord .42s ease 1.12s both}
+.qp-floor-shadow{animation:qpShadowReveal 1.2s ease .8s forwards}
+@keyframes qpV3OrbitTeal{0%{transform:rotate(-65deg) scale(1.3)}65%{transform:rotate(20deg) scale(1)}100%{transform:rotate(65deg) scale(.65)}}
+@keyframes qpV3OrbitGold{0%{transform:rotate(65deg) scale(1.3)}65%{transform:rotate(-20deg) scale(1)}100%{transform:rotate(-65deg) scale(.65)}}
+@keyframes qpV3Entrance{0%{opacity:0;transform:translateY(8px) scale(.85)}64%{opacity:1;transform:translateY(-2px) scale(1.025)}84%{transform:translateY(.5px) scale(.995)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes qpV3Cord{0%{transform:translateY(-2px)}65%{transform:translateY(1px)}100%{transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.qp-splash-overlay{animation:qpSplashFadeOut .18s ease .12s forwards!important}.qp-cord-left,.qp-cord-center,.qp-cord-right{transform:none!important}.qp-floor-shadow{animation:none!important;opacity:.1}}
+/* CODEX MOTION V3 END */

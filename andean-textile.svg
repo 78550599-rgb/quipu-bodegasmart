@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 24" width="144" height="24" fill="none">
+  <title>Franja geométrica de colores</title>
+  <path fill="#173f35" d="M0 0h144v24H0z"/><path fill="#e76f51" d="M0 0h144v3H0zM0 21h144v3H0z"/><path fill="#f6b83e" d="M0 4h144v1H0zM0 19h144v1H0z"/>
+  <defs><pattern id="weave" width="36" height="24" patternUnits="userSpaceOnUse"><path d="M0 12h3V9h3V6h6v3h3v3h6v3h3v3h6v-3h3v-3h3" stroke="#fff8ed" stroke-width="1.7" stroke-linejoin="miter"/><path d="m4 12 5-5 5 5-5 5Z" fill="#f6b83e"/><path d="m22 12 5-5 5 5-5 5Z" fill="#087f8c"/><path d="m7 12 2-2 2 2-2 2Z" fill="#9b385e"/></pattern></defs>
+  <path fill="url(#weave)" d="M0 0h144v24H0z"/>
+</svg>

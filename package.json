@@ -1,0 +1,9 @@
+{
+  "name": "bodegasmart-quipu",
+  "version": "1.0.0",
+  "description": "Quipu · Gestión de bodega y educación financiera",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
