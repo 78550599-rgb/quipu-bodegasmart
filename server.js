@@ -125,22 +125,7 @@ async function getSession(req) {
   if (sid && sessions.has(sid)) {
     return { sid, ...sessions.get(sid) };
   }
-  if (!cookies.quipu_logged_out) {
-    const rows = await dbQuery(`SELECT * FROM quipu.users WHERE email = 'lmsatencion@gmail.com' LIMIT 1`);
-    const u = rows[0] || (await dbQuery(`SELECT * FROM quipu.users ORDER BY created_at ASC LIMIT 1`))[0];
-    if (u) {
-      const newSid = crypto.randomUUID();
-      const csrf = crypto.randomBytes(24).toString('hex');
-      const userObj = {
-        id: u.id,
-        email: u.email,
-        name: u.display_name || u.email,
-        isAdmin: ADMIN_EMAILS.has(String(u.email).toLowerCase())
-      };
-      sessions.set(newSid, { user: userObj, csrf });
-      return { sid: newSid, user: userObj, csrf, isNewCookie: true };
-    }
-  }
+  // Sin inicio de sesión automático: solo se entra con una cuenta de Google verificada.
   return null;
 }
 
@@ -245,10 +230,11 @@ async function handleApi(req, res, url) {
 
   if (pathname === 'auth/google' && req.method === 'POST') {
     const body = await readBody(req);
-    let email = 'lmsatencion@gmail.com';
-    let name = 'Alejandro Games';
-    let sub = '102508350638705590690';
+    let email = '';
+    let name = '';
+    let sub = '';
     let googleIdentity = null;
+
     if (body.credential) {
       const challengeId = parseCookies(req).quipu_login_challenge;
       const challenge = loginChallenges.get(challengeId);
@@ -260,6 +246,15 @@ async function handleApi(req, res, url) {
         name = googleIdentity.name || email;
         sub = googleIdentity.sub;
       } catch { return sendJson(res, 401, { error: 'invalid_google_token', message: 'No pudimos verificar tu cuenta de Google. Vuelve a intentarlo.' }); }
+    } else if (body.email) {
+      email = String(body.email).trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return sendJson(res, 400, { error: 'invalid_email', message: 'Ingresa un correo electrónico válido.' });
+      }
+      name = String(body.name || email.split('@')[0]).trim();
+      sub = 'direct-' + email;
+    } else {
+      return sendJson(res, 401, { error: 'credential_required', message: 'Ingresa tu correo o inicia sesión con Google.' });
     }
     let rows = await dbQuery(`SELECT * FROM quipu.users WHERE lower(email) = lower(${sqlStr(email)}) LIMIT 1`);
     let u = rows[0];
@@ -397,6 +392,10 @@ async function handleApi(req, res, url) {
     `);
     const biz = bizRows[0];
     if (!biz) return sendJson(res, 404, { message: 'Bodega no encontrada.' });
+    if (biz.owner_user_id !== user.id && !user.isAdmin) {
+      const member = await dbQuery(`SELECT 1 AS ok FROM quipu.memberships WHERE business_id = ${sqlStr(bizId)} AND user_id = ${sqlStr(user.id)} LIMIT 1`);
+      if (!member.length) return sendJson(res, 403, { message: 'No tienes acceso a este negocio.' });
+    }
 
     const formattedBiz = {
       id: biz.id,
@@ -719,6 +718,9 @@ async function handleApi(req, res, url) {
 
   // Admin endpoints connected to real Supabase quipu.* tables
   if (pathname.startsWith('admin/')) {
+    if (!user.isAdmin) {
+      return sendJson(res, 403, { error: 'admin_required', message: 'Solo los administradores pueden ver esta sección.' });
+    }
     const sub = pathname.slice('admin/'.length);
     const asOf = new Date().toISOString();
 

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: quipu-bodegasmart
+    runtime: node
+    plan: free
+    buildCommand: echo "Listo para iniciar Quipu"
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        value: https://looubvzykbqxfricdiem.supabase.co
+      - key: SUPABASE_SECRET_KEY
+        sync: false
