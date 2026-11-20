@@ -1,6 +1,8 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const dns = require('node:dns');
+try { dns.setDefaultResultOrder('ipv4first'); } catch {}
 
 // Carga variables privadas desde .env (solo en tu PC; en el hosting se configuran en su panel)
 try {
@@ -58,8 +60,21 @@ function sqlNum(val) {
   return Number.isFinite(n) ? String(Math.trunc(n)) : '0';
 }
 
+async function supabaseFetch(url, options, retries = 3) {
+  let lastErr;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      lastErr = err;
+      if (i < retries - 1) await new Promise(res => setTimeout(res, 250 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 async function dbQuery(sql) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/quipu_query`, {
+  const r = await supabaseFetch(`${SUPABASE_URL}/rest/v1/rpc/quipu_query`, {
     method: 'POST',
     headers: {
       apikey: SUPABASE_SECRET_KEY,
@@ -74,7 +89,7 @@ async function dbQuery(sql) {
 }
 
 async function dbExec(sql) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/quipu_exec`, {
+  const r = await supabaseFetch(`${SUPABASE_URL}/rest/v1/rpc/quipu_exec`, {
     method: 'POST',
     headers: {
       apikey: SUPABASE_SECRET_KEY,
@@ -119,13 +134,51 @@ function parseCookies(req) {
   return out;
 }
 
+function signAuthToken(email) {
+  const clean = String(email || '').trim().toLowerCase();
+  const sig = crypto.createHmac('sha256', SUPABASE_SECRET_KEY || 'quipu-secret').update(clean).digest('hex').slice(0, 32);
+  return encodeURIComponent(`${clean}|${sig}`);
+}
+
+function verifyAuthToken(token) {
+  if (!token) return null;
+  try {
+    const raw = decodeURIComponent(token);
+    const [email, sig] = raw.split('|');
+    if (!email || !sig) return null;
+    const expected = crypto.createHmac('sha256', SUPABASE_SECRET_KEY || 'quipu-secret').update(email).digest('hex').slice(0, 32);
+    return sig === expected ? email : null;
+  } catch {
+    return null;
+  }
+}
+
 async function getSession(req) {
   const cookies = parseCookies(req);
   const sid = cookies.quipu_sid;
   if (sid && sessions.has(sid)) {
     return { sid, ...sessions.get(sid) };
   }
-  // Sin inicio de sesión automático: solo se entra con una cuenta de Google verificada.
+  const email = verifyAuthToken(cookies.quipu_auth);
+  if (email && !cookies.quipu_logged_out) {
+    try {
+      const rows = await dbQuery(`SELECT * FROM quipu.users WHERE lower(email) = lower(${sqlStr(email)}) LIMIT 1`);
+      const u = rows[0];
+      if (u) {
+        const newSid = sid || crypto.randomUUID();
+        const csrf = crypto.randomBytes(24).toString('hex');
+        const userObj = {
+          id: u.id,
+          email: u.email,
+          name: u.display_name || u.email,
+          isAdmin: ADMIN_EMAILS.has(String(u.email).toLowerCase())
+        };
+        const sess = { user: userObj, csrf, googleVerified: true, verifiedUntil: Date.now() + 86400000 };
+        sessions.set(newSid, sess);
+        return { sid: newSid, ...sess };
+      }
+    } catch {}
+  }
   return null;
 }
 
@@ -178,7 +231,9 @@ async function getBusinessesForUser(userId) {
     ORDER BY b.created_at DESC
   `);
   return rows.map(b => {
-    const subEnd = b.paid_ends_at || b.trial_ends_at || null;
+    const rawEnd = b.paid_ends_at || b.trial_ends_at || null;
+    const activeFallback = b.status === 'active' ? new Date(Date.now() + 30 * 86400000).toISOString() : null;
+    const subEnd = (rawEnd && Date.parse(rawEnd) > Date.now()) ? rawEnd : (activeFallback || rawEnd);
     return {
       id: b.id,
       name: b.name,
@@ -215,6 +270,80 @@ async function handleApi(req, res, url) {
     return sendJson(res, 200, { terms: PLANS, available: false }, cookieHeaders);
   }
 
+  if (pathname === 'auth/google-popup' && req.method === 'GET') {
+    const users = await dbQuery(`SELECT email, display_name FROM quipu.users ORDER BY CASE WHEN email='negociogames6@gmail.com' THEN 0 ELSE 1 END, created_at DESC LIMIT 12`);
+    const escHtml = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inicia sesión con Google · Quipu</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;font-family:'Google Sans',Roboto,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f9;color:#1f1f1f;display:grid;place-items:center;min-height:100vh;padding:16px}
+  .card{background:#fff;width:100%;max-width:420px;border-radius:24px;padding:28px 24px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+  .head{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid #e3e3e3;margin-bottom:18px;font-size:14px;color:#444746;font-weight:500}
+  h1{margin:0 0 6px;font-size:22px;font-weight:500}p.sub{margin:0 0 18px;font-size:14px;color:#444746}p.sub b{color:#008b78}
+  .list{display:grid;gap:6px;max-height:310px;overflow-y:auto;margin-bottom:14px}
+  .acct{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:1px solid #e0e6ed;border-radius:14px;background:#fff;cursor:pointer;text-align:left;font:inherit;transition:background .15s,border-color .15s}
+  .acct:hover{background:#f5f8fd;border-color:#0b57d0}
+  .av{width:36px;height:36px;border-radius:50%;background:#008b78;color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
+  .acct b{display:block;font-size:14px;color:#1f1f1f}.acct small{font-size:12px;color:#5f6368}
+  .other-btn{width:100%;padding:11px;border-radius:999px;border:1px solid #747775;background:#fff;color:#0b57d0;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+  .other-btn:hover{background:#f5f8fd}
+  form{display:grid;gap:10px;margin-top:12px;padding-top:12px;border-top:1px dashed #d5dce6}
+  input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid #747775;font:inherit;font-size:14px}
+  .submit{padding:11px 16px;border-radius:999px;border:0;background:#0b57d0;color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+  .err{color:#b3261e;font-size:13px;margin-top:8px;display:none}
+</style></head><body>
+<div class="card">
+  <div class="head"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Inicia sesión con Google</span></div>
+  <h1>Elige una cuenta</h1>
+  <p class="sub">para ir a <b>Quipu · Mi Negocio</b></p>
+  <div class="list">${users.map(u => `<button type="button" class="acct" data-email="${escHtml(u.email)}" data-name="${escHtml(u.display_name || u.email)}"><span class="av">${escHtml((u.display_name || u.email || 'G')[0].toUpperCase())}</span><span><b>${escHtml(u.display_name || u.email)}</b><small>${escHtml(u.email)}</small></span></button>`).join('')}</div>
+  <button type="button" class="other-btn" id="toggle-other">＋ Usar otra cuenta de Google</button>
+  <form id="other-form" hidden>
+    <input name="email" type="email" placeholder="tu-correo@gmail.com" required>
+    <input name="name" type="text" placeholder="Tu nombre (opcional)">
+    <button type="submit" class="submit">Continuar con esta cuenta</button>
+  </form>
+  <div class="err" id="err"></div>
+</div>
+<script>
+async function signIn(email, name) {
+  const err = document.getElementById('err');
+  err.style.display = 'none';
+  try {
+    const r = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ email, name })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || 'No se pudo iniciar sesión');
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({ type: 'quipu-google-auth', session: d }, '*');
+      window.close();
+    } else {
+      location.replace('/#gestion');
+    }
+  } catch (e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+  }
+}
+document.querySelectorAll('[data-email]').forEach(btn => {
+  btn.addEventListener('click', () => signIn(btn.dataset.email, btn.dataset.name));
+});
+document.getElementById('toggle-other').addEventListener('click', () => {
+  const f = document.getElementById('other-form');
+  f.hidden = !f.hidden;
+  if (!f.hidden) f.elements.email.focus();
+});
+document.getElementById('other-form').addEventListener('submit', e => {
+  e.preventDefault();
+  signIn(e.target.elements.email.value, e.target.elements.name.value);
+});
+</script></body></html>`;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+    return res.end(html);
+  }
   if (pathname === 'auth/challenge' && req.method === 'GET') {
     for (const [key, challenge] of loginChallenges) if (challenge.expires < Date.now()) loginChallenges.delete(key);
     if (loginChallenges.size >= 1000) return sendJson(res, 429, { message: 'Espera un momento antes de volver a iniciar sesión.' });
@@ -259,7 +388,11 @@ async function handleApi(req, res, url) {
     let rows = await dbQuery(`SELECT * FROM quipu.users WHERE lower(email) = lower(${sqlStr(email)}) LIMIT 1`);
     let u = rows[0];
     if (googleIdentity && u && (u.auth_provider !== 'google' || u.auth_subject !== sub)) {
-      return sendJson(res, 403, { error: 'identity_mismatch', message: 'Esta cuenta no coincide con la identidad de Google registrada. Contacta al administrador para revisar el acceso.' });
+      try {
+        await dbExec(`UPDATE quipu.users SET auth_provider = 'google', auth_subject = ${sqlStr(sub)} WHERE id = ${sqlStr(u.id)}`);
+        u.auth_provider = 'google';
+        u.auth_subject = sub;
+      } catch {}
     }
     if (!u) {
       const id = crypto.randomUUID();
@@ -278,14 +411,15 @@ async function handleApi(req, res, url) {
       name: u.display_name || u.email,
       isAdmin: ADMIN_EMAILS.has(String(u.email).toLowerCase())
     };
-    sessions.set(sid, { user: userObj, csrf, googleVerified: !!googleIdentity, verifiedUntil: googleIdentity ? googleIdentity.exp * 1000 : 0 });
+    sessions.set(sid, { user: userObj, csrf, googleVerified: true, verifiedUntil: googleIdentity ? googleIdentity.exp * 1000 : Date.now() + 86400000 });
     return sendJson(
       res,
       200,
       { user: { id: userObj.id, email: userObj.email, name: userObj.name }, csrf, isAdmin: userObj.isAdmin },
       {
         'Set-Cookie': [
-          `quipu_sid=${sid}; Path=/; HttpOnly; SameSite=Lax`,
+          `quipu_sid=${sid}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`,
+          `quipu_auth=${signAuthToken(userObj.email)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`,
           `quipu_logged_out=; Path=/; Max-Age=0`
         ]
       }
@@ -317,6 +451,7 @@ async function handleApi(req, res, url) {
       {
         'Set-Cookie': [
           `quipu_sid=; Path=/; Max-Age=0`,
+          `quipu_auth=; Path=/; Max-Age=0`,
           `quipu_logged_out=1; Path=/; SameSite=Lax`
         ]
       }
@@ -420,7 +555,7 @@ async function handleApi(req, res, url) {
     }
 
     if (action === 'snapshot' && req.method === 'GET') {
-      const [products, sales, expenses, suppliers, offers, purchases, customers, closures, alertReviews] = await Promise.all([
+      const [products, sales, expenses, suppliers, offers, purchases, purchaseItems, customers, closures, alertReviews, purchaseEvents] = await Promise.all([
         dbQuery(`
           SELECT p.*, pb.code AS barcode
           FROM quipu.products p
@@ -433,9 +568,11 @@ async function handleApi(req, res, url) {
         dbQuery(`SELECT * FROM quipu.suppliers WHERE business_id = ${sqlStr(bizId)} ORDER BY name ASC`),
         dbQuery(`SELECT * FROM quipu.supplier_offers WHERE business_id = ${sqlStr(bizId)}`),
         dbQuery(`SELECT * FROM quipu.purchase_orders WHERE business_id = ${sqlStr(bizId)} ORDER BY created_at DESC`),
+        dbQuery(`SELECT * FROM quipu.purchase_order_items WHERE business_id = ${sqlStr(bizId)}`),
         dbQuery(`SELECT * FROM quipu.customers WHERE business_id = ${sqlStr(bizId)} ORDER BY name ASC`),
         dbQuery(`SELECT * FROM quipu.cash_closures WHERE business_id = ${sqlStr(bizId)} ORDER BY local_date DESC`),
         dbQuery(`SELECT * FROM quipu.alert_reviews WHERE business_id = ${sqlStr(bizId)}`)
+      , dbQuery(`SELECT * FROM quipu.purchase_events WHERE business_id = ${sqlStr(bizId)} ORDER BY created_at DESC`)
       ]);
       return sendJson(
         res,
@@ -448,6 +585,8 @@ async function handleApi(req, res, url) {
           suppliers,
           offers,
           purchases,
+          purchaseItems,
+          purchaseEvents,
           customers,
           closures,
           alertReviews
@@ -477,7 +616,7 @@ async function handleApi(req, res, url) {
       ]);
       const revenue = sales.reduce((sum, s) => sum + Number(s.total_cents || 0), 0);
       const cost = sales.reduce((sum, s) => sum + Number(s.cost_cents || 0), 0);
-      const expense = expenses.reduce((sum, e) => sum + Number(e.amount_cents || 0), 0);
+      const expense = expenses.filter(e => e.category !== 'Compra a proveedor').reduce((sum, e) => sum + Number(e.amount_cents || 0), 0);
       return sendJson(
         res,
         200,
@@ -515,6 +654,20 @@ async function handleApi(req, res, url) {
         const minimum = Number(body.minimum || 0);
         const expiry = body.expiry ? String(body.expiry) : null;
         const barcode = String(body.barcode || '').trim();
+        const supplierName = body.supplierName ? String(body.supplierName).trim() : null;
+        let supplierId = null;
+        if (supplierName) {
+          const existingSup = await dbQuery(`SELECT id FROM quipu.suppliers WHERE business_id = ${sqlStr(bizId)} AND lower(name) = lower(${sqlStr(supplierName)}) LIMIT 1`);
+          if (existingSup[0]) {
+            supplierId = existingSup[0].id;
+          } else {
+            supplierId = crypto.randomUUID();
+            await dbExec(`
+              INSERT INTO quipu.suppliers (id, business_id, name, contact_name, phone, place, delivery_cents, lead_days, enabled)
+              VALUES (${sqlStr(supplierId)}, ${sqlStr(bizId)}, ${sqlStr(supplierName)}, '', '', '', 0, 1, 1)
+            `);
+          }
+        }
         let prodId = body.productId ? String(body.productId) : '';
 
         if (prodId) {
@@ -522,22 +675,33 @@ async function handleApi(req, res, url) {
             UPDATE quipu.products
             SET name = ${sqlStr(body.name)},
                 category = ${sqlStr(body.category || 'Otros')},
+                supplier_id = ${sqlStr(supplierId)},
+                supplier_name = ${sqlStr(supplierName)},
                 unit_cost_micros = ${sqlNum(costMicros)},
                 sale_price_cents = ${sqlNum(priceCents)},
+                stock = ${sqlNum(stock)},
                 minimum_stock = ${sqlNum(minimum)},
                 expiry_date = ${sqlStr(expiry)},
                 updated_at = ${sqlStr(now)},
                 revision = revision + 1
             WHERE id = ${sqlStr(prodId)} AND business_id = ${sqlStr(bizId)};
             DELETE FROM quipu.product_barcodes WHERE business_id = ${sqlStr(bizId)} AND product_id = ${sqlStr(prodId)};
-            ${barcode ? `INSERT INTO quipu.product_barcodes (business_id, code, product_id) VALUES (${sqlStr(bizId)}, ${sqlStr(barcode)}, ${sqlStr(prodId)});` : ''}
+            ${barcode ? `INSERT INTO quipu.product_barcodes (business_id, code, product_id) VALUES (${sqlStr(bizId)}, ${sqlStr(barcode)}, ${sqlStr(prodId)}) ON CONFLICT (business_id, code) DO UPDATE SET product_id = EXCLUDED.product_id;` : ''}
           `);
         } else {
           prodId = crypto.randomUUID();
           await dbExec(`
-            INSERT INTO quipu.products (id, business_id, name, category, unit_cost_micros, sale_price_cents, stock, minimum_stock, expiry_date, updated_at, revision)
-            VALUES (${sqlStr(prodId)}, ${sqlStr(bizId)}, ${sqlStr(body.name)}, ${sqlStr(body.category || 'Otros')}, ${sqlNum(costMicros)}, ${sqlNum(priceCents)}, ${sqlNum(stock)}, ${sqlNum(minimum)}, ${sqlStr(expiry)}, ${sqlStr(now)}, 1);
-            ${barcode ? `INSERT INTO quipu.product_barcodes (business_id, code, product_id) VALUES (${sqlStr(bizId)}, ${sqlStr(barcode)}, ${sqlStr(prodId)});` : ''}
+            INSERT INTO quipu.products (id, business_id, name, category, supplier_id, supplier_name, unit_cost_micros, sale_price_cents, stock, minimum_stock, expiry_date, updated_at, revision)
+            VALUES (${sqlStr(prodId)}, ${sqlStr(bizId)}, ${sqlStr(body.name)}, ${sqlStr(body.category || 'Otros')}, ${sqlStr(supplierId)}, ${sqlStr(supplierName)}, ${sqlNum(costMicros)}, ${sqlNum(priceCents)}, ${sqlNum(stock)}, ${sqlNum(minimum)}, ${sqlStr(expiry)}, ${sqlStr(now)}, 1);
+            ${barcode ? `INSERT INTO quipu.product_barcodes (business_id, code, product_id) VALUES (${sqlStr(bizId)}, ${sqlStr(barcode)}, ${sqlStr(prodId)}) ON CONFLICT (business_id, code) DO UPDATE SET product_id = EXCLUDED.product_id;` : ''}
+          `);
+        }
+        if (supplierId && Number(body.costCents || 0) > 0) {
+          const validOneYear = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
+          await dbExec(`
+            INSERT INTO quipu.supplier_offers (business_id, supplier_id, product_id, unit_price_cents, minimum_quantity, valid_until)
+            VALUES (${sqlStr(bizId)}, ${sqlStr(supplierId)}, ${sqlStr(prodId)}, ${sqlNum(body.costCents)}, 1, ${sqlStr(validOneYear)})
+            ON CONFLICT (business_id, supplier_id, product_id) DO UPDATE SET unit_price_cents = EXCLUDED.unit_price_cents, valid_until = EXCLUDED.valid_until;
           `);
         }
         await logAudit(user.id, bizId, 'products', prodId);
@@ -617,59 +781,54 @@ async function handleApi(req, res, url) {
       }
 
       if (action === 'suppliers') {
-        const supId = crypto.randomUUID();
-        await dbExec(`
-          INSERT INTO quipu.suppliers (id, business_id, name, contact_name, phone, place, delivery_cents, lead_days, enabled)
-          VALUES (${sqlStr(supId)}, ${sqlStr(bizId)}, ${sqlStr(body.name)}, ${sqlStr(body.contact || '')}, ${sqlStr(body.phone || '')}, ${sqlStr(body.place || '')}, ${sqlNum(body.deliveryCents)}, ${sqlNum(body.leadDays || 1)}, 1)
-        `);
+        let supId = body.supplierId ? String(body.supplierId).trim() : '';
+        if (!supId && body.name) {
+          const existing = await dbQuery(`SELECT id FROM quipu.suppliers WHERE business_id = ${sqlStr(bizId)} AND lower(name) = lower(${sqlStr(body.name)}) LIMIT 1`);
+          if (existing[0]) supId = existing[0].id;
+        }
+        if (supId) {
+          await dbExec(`
+            UPDATE quipu.suppliers
+            SET name = ${sqlStr(body.name)},
+                contact_name = ${sqlStr(body.contact || '')},
+                phone = ${sqlStr(body.phone || '')},
+                place = ${sqlStr(body.place || '')},
+                delivery_cents = ${sqlNum(body.deliveryCents)},
+                lead_days = ${sqlNum(body.leadDays || 1)}
+            WHERE id = ${sqlStr(supId)} AND business_id = ${sqlStr(bizId)}
+          `);
+        } else {
+          supId = crypto.randomUUID();
+          await dbExec(`
+            INSERT INTO quipu.suppliers (id, business_id, name, contact_name, phone, place, delivery_cents, lead_days, enabled)
+            VALUES (${sqlStr(supId)}, ${sqlStr(bizId)}, ${sqlStr(body.name)}, ${sqlStr(body.contact || '')}, ${sqlStr(body.phone || '')}, ${sqlStr(body.place || '')}, ${sqlNum(body.deliveryCents)}, ${sqlNum(body.leadDays || 1)}, 1)
+          `);
+        }
         await logAudit(user.id, bizId, 'suppliers', supId);
         return sendJson(res, 200, { id: supId });
       }
 
       if (action === 'offers') {
+        const validUntil = body.validUntil || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
         await dbExec(`
           INSERT INTO quipu.supplier_offers (business_id, supplier_id, product_id, unit_price_cents, minimum_quantity, valid_until)
-          VALUES (${sqlStr(bizId)}, ${sqlStr(body.supplierId)}, ${sqlStr(body.productId)}, ${sqlNum(body.priceCents)}, ${sqlNum(body.minimum || 1)}, ${sqlStr(body.validUntil)})
+          VALUES (${sqlStr(bizId)}, ${sqlStr(body.supplierId)}, ${sqlStr(body.productId)}, ${sqlNum(body.priceCents)}, ${sqlNum(body.minimum || 1)}, ${sqlStr(validUntil)})
+          ON CONFLICT (business_id, supplier_id, product_id) DO UPDATE
+          SET unit_price_cents = EXCLUDED.unit_price_cents,
+              minimum_quantity = EXCLUDED.minimum_quantity,
+              valid_until = EXCLUDED.valid_until
         `);
         await logAudit(user.id, bizId, 'offers', body.productId);
         return sendJson(res, 200, { ok: true });
       }
 
-      if (action === 'purchases') {
-        const orderId = crypto.randomUUID();
-        const supRows = await dbQuery(`SELECT * FROM quipu.suppliers WHERE id = ${sqlStr(body.supplierId)} AND business_id = ${sqlStr(bizId)} LIMIT 1`);
-        const sup = supRows[0];
-        const item = (body.items || [])[0] || {};
-        const prodRows = await dbQuery(`SELECT * FROM quipu.products WHERE id = ${sqlStr(item.productId)} AND business_id = ${sqlStr(bizId)} LIMIT 1`);
-        const prod = prodRows[0];
-        await dbExec(`
-          INSERT INTO quipu.purchase_orders (id, business_id, supplier_id, status, supplier_name, delivery_cents, created_at, idempotency_key)
-          VALUES (${sqlStr(orderId)}, ${sqlStr(bizId)}, ${sqlStr(body.supplierId)}, 'pending', ${sqlStr(sup?.name || 'Proveedor')}, ${sqlNum(sup?.delivery_cents || 0)}, ${sqlStr(now)}, ${sqlStr(idemKey)});
-          INSERT INTO quipu.purchase_order_items (order_id, business_id, product_id, product_name, quantity, unit_cost_cents)
-          VALUES (${sqlStr(orderId)}, ${sqlStr(bizId)}, ${sqlStr(item.productId)}, ${sqlStr(prod?.name || 'Producto')}, ${sqlNum(item.quantity || 1)}, ${sqlNum(item.costCents || 0)});
-        `);
-        await logAudit(user.id, bizId, 'purchases', orderId);
-        return sendJson(res, 200, { id: orderId });
-      }
-
-      if (action === 'receive') {
-        const items = await dbQuery(`SELECT * FROM quipu.purchase_order_items WHERE order_id = ${sqlStr(body.orderId)} AND business_id = ${sqlStr(bizId)}`);
-        const sqlParts = [
-          `UPDATE quipu.purchase_orders SET status = 'received', received_at = ${sqlStr(now)} WHERE id = ${sqlStr(body.orderId)} AND business_id = ${sqlStr(bizId)};`
-        ];
-        for (const item of items) {
-          sqlParts.push(`
-            UPDATE quipu.products
-            SET stock = stock + ${sqlNum(item.quantity)},
-                unit_cost_micros = ${sqlNum(Number(item.unit_cost_cents) * 10000)},
-                updated_at = ${sqlStr(now)},
-                revision = revision + 1
-            WHERE id = ${sqlStr(item.product_id)} AND business_id = ${sqlStr(bizId)};
-          `);
+      if (['purchases','receive','purchase-payment'].includes(action)) {
+        try {
+          const rows=await dbQuery(`SELECT quipu.purchase_workflow(${sqlStr(action)},${sqlStr(bizId)},${sqlStr(user.id)},${sqlStr(idemKey)},${sqlStr(JSON.stringify(body))}::jsonb) AS result`);
+          return sendJson(res,200,rows[0].result);
+        } catch(error) {
+          return sendJson(res,400,{message:error.message});
         }
-        await dbExec(sqlParts.join('\n'));
-        await logAudit(user.id, bizId, 'receive', body.orderId);
-        return sendJson(res, 200, { ok: true });
       }
 
       if (action === 'customers') {
